@@ -1,0 +1,48 @@
+# Name of server.
+owner = "wfs1"
+
+# Device type.
+device = "Shack-Hartmann wavefront sensor"
+
+# Dependencies are specified with the name of the corresponding server.
+dependencies = ["cam1"]
+
+# Algorithm for processing the images and extracting the measurements.
+[algorithm]
+# Some parameters (spatial_regularization, forgetting_factor, etc.) may be tuned on the
+# fly and their initial values (when server is launched) are given in this file.
+method = "linearized matched filter"
+output_data = "weighted slopes"
+template_size = [64,64]
+spatial_regularization = 5e4
+forgetting_factor = 0.9995
+restoring_force = 30.0
+maximum_excursion = inf
+normalize = true
+mask_size = [21,21]
+
+# Geometrical parameters.
+[geometry]
+# Layout of sub-pupils ('x' indicate valid sub-pupils, numbered in lexicographic order:
+# from top-left to bottom-right):
+shape = [
+    "  xxxxxx  ",
+    " xxxxxxxx ",
+    "xxxxxxxxxx",
+    "xxxx  xxxx",
+    "xxx    xxx",
+    "xxx    xxx",
+    "xxxx  xxxx",
+    "xxxxxxxxxx",
+    " xxxxxxxx ",
+    "  xxxxxx  "]
+# Bounding-boxes of sub-pupils (a list of 4 integers per sub-pupil: X and Y offsets
+# relative to image edges, folowed by width and height, X varies the fastest).
+boxes = [0, 11, 33, 34,
+         45, 11, 32, 35,
+         81, 12, 33, 33]
+# Reference positions, (a list of 2 floating-point offsets per sub-pupil relative
+# to bounding-box of sub-pupil).
+refs = [15.3, 18.1,
+        16.2, 14.7,
+        15.7, 17.3]

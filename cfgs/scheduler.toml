@@ -1,0 +1,65 @@
+# Configuration of TAO Configuration Server.
+
+# Name of this server.
+owner = "scheduler"
+
+# Socket to which client can connect. If an absolute file name is specified, a Unix local
+# socket is used. Otherwise, a TCP/IP socket is specified as port number.
+socket = "/tmp/tao/scheduler/io"
+#socket = 31415
+
+# Git repository where configutations are registered.
+repository = "/home/eric/git/adaptive_optics/tao-config"
+
+[servers]
+# Table of servers.
+#
+# Each server configuration is a sub-table identified by its owner's name.
+#
+# Each server may have entries:
+# - `type` = type of server: Camera, DeformableMirror, TipTiltMirror, WavefrontSensor,
+#   Controller, etc.
+# - `launch` = command to launch the server argument `$owner` is
+#   automatically replaced by the owner's name;
+# - `env` = table of environment variables for the launch command;
+# - `input` = name of server providing input data;
+# - `output` = name of server to which output data is actively sent;
+# - `real-time` = parameters for setting real-time priority (a string with option flags
+#   followed by a priority level, see man-page of `chrt`, flag `-p` and `PID` are
+#   automaticaly inserted in the command line);
+# - `cpu-list` = argument of the `--cpu-list` option of the `taskset` command for
+#   specifying CPU(s) affinity, can be a scalar integer or an array of integers;
+
+[servers.cam1]
+type = "Camera"
+launch = "andor_server -nbufs 20 -nofancy 0 $owner"
+env = { LD_LIBRARY_PATH = "/home/eric/apps/drivers/andor/lib" }
+real-time = "-a -r 80"
+cpu-list = "0-4:2"
+
+[servers.cam1.config]
+gain = 100
+bias = 50
+roi = [...]
+framerate = 1000
+
+[servers.dm1]
+type = "DeformableMirror"
+launch = "tao_fake_mirror_server -nacts 97 -orient 0 -nbufs 20000 $owner"
+real-time = "-a -r 80"
+cpu-list = 6
+
+[servers.wfs1]
+type = "WavefrontSensor"
+launch = "tao_wavefront_sensor -nbufs 20000 $owner"
+input = "cam1"
+real-time = "-a -r 80"
+cpu-list = [8, 10]
+
+[servers.ctrl1]
+type = "Controller"
+launch = "tao_controller -nbufs 10000 $owner"
+input = "wfs1"
+output = "dm1"
+real-time = "-a -r 80"
+cpu-list = 12
